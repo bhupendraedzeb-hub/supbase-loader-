@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Keyword Tool | Working…</title>
+  <link rel="stylesheet" href="assets/styles.css" />
+</head>
+<body>
+  <div class="container">
+    <div class="card">
+      <div class="header">
+        <div>
+          <h1>Cooking your keywords…</h1>
+          <p class="muted">This is the part where computers pretend to be fast.</p>
+        </div>
+        <span class="badge" id="ttlBadge">Memory: 10 minutes</span>
+      </div>
+
+      <div class="hr"></div>
+
+      <div class="center">
+        <div class="spinner" aria-hidden="true"></div>
+        <div class="muted" id="statusLine">Sending request to webhook…</div>
+      </div>
+
+      <div class="quoteBox">
+        <div class="quote" id="quote"></div>
+        <div class="muted tiny" id="quoteMeta"></div>
+      </div>
+
+      <div class="hr"></div>
+
+      <div class="mini muted">
+        If this hangs forever: your n8n webhook isn’t responding (or CORS is blocking it). Humans love doing that.
+      </div>
+    </div>
+  </div>
+
+  <script src="assets/config.js"></script>
+  <script src="assets/app.js"></script>
+  <script>initWaitPage();</script>
+</body>
+</html>
