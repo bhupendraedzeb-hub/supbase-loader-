@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Keyword Tool | Input</title>
+  <link rel="stylesheet" href="assets/styles.css" />
+</head>
+<body>
+  <div class="container">
+    <div class="card">
+      <div class="header">
+        <div>
+          <h1>Keyword Analyzer</h1>
+          <p class="muted">Pick a task, enter an input, and we’ll send it to your n8n webhook.</p>
+        </div>
+        <span class="badge">Memory: 10 minutes</span>
+      </div>
+
+      <div class="hr"></div>
+
+      <form id="kwForm" class="form">
+        <label class="label" for="action">What do you want to do?</label>
+        <select id="action" class="input input--select" required>
+          <option value="keyword_research" selected>Get keyword (seed keyword)</option>
+          <option value="site_keywords">Get website keyword (domain)</option>
+        </select>
+
+        <label id="inputLabel" class="label" for="userInput">Enter seed keyword</label>
+        <div class="row">
+          <input id="userInput" class="input" placeholder="e.g. robotic" autocomplete="off" required />
+          <button class="btn" type="submit">Run</button>
+        </div>
+
+        <p id="hint" class="hint muted">We’ll call the webhook and show results on the next page.</p>
+      </form>
+
+      <div class="hr"></div>
+
+      <div class="mini muted">
+        Tip: For “Get website keyword”, enter a domain like <code>dataforseo.com</code> (we’ll strip http/https if you paste a URL).
+      </div>
+    </div>
+  </div>
+
+  <script src="assets/config.js"></script>
+  <script src="assets/app.js"></script>
+  <script>initIndexPage();</script>
+</body>
+</html>

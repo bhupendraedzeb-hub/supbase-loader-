@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Keyword Tool | Results</title>
+  <link rel="stylesheet" href="assets/styles.css" />
+  <!-- SheetJS for XLSX export -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+</head>
+<body>
+  <div class="container container--wide">
+    <div class="card">
+      <div class="header">
+        <div>
+          <h1>Results</h1>
+          <p class="muted" id="summary"></p>
+        </div>
+        <div class="headerActions">
+          <button class="btn btn--ghost" id="backBtn" type="button">New Search</button>
+          <button class="btn" id="downloadBtn" type="button">Download XLSX</button>
+        </div>
+      </div>
+
+      <div class="hr"></div>
+
+      <div id="tabs" class="tabs"></div>
+
+      <div class="row row--between">
+        <input id="filterInput" class="input" placeholder="Filter current tab (type to search)..." />
+        <div class="muted tiny" id="countLine"></div>
+      </div>
+
+      <div class="tableWrap">
+        <table class="table" id="table"></table>
+      </div>
+
+      <div class="hr"></div>
+      <div class="mini muted">
+        Memory expires in 10 minutes. After that, refresh will show nothing because that’s what “memory” means in browser land.
+      </div>
+    </div>
+  </div>
+
+  <script src="assets/config.js"></script>
+  <script src="assets/app.js"></script>
+  <script>initResultPage();</script>
+</body>
+</html>

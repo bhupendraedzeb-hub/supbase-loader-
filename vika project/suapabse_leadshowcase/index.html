@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Supabase Data Viewer</title>
+    <!-- Load Supabase JS SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+            max-width: 1000px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+        .controls {
+            background: #f8f9fa;
+            padding: 1.2rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+        }
+        label {
+            display: block;
+            margin: 0.5rem 0 0.25rem;
+            font-weight: 600;
+        }
+        input, select, button {
+            padding: 0.5rem;
+            margin-right: 0.75rem;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        button {
+            background: #3b82f6;
+            color: white;
+            cursor: pointer;
+            font-weight: bold;
+            border: none;
+        }
+        button:hover {
+            background: #2563eb;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 0.75rem;
+            text-align: left;
+            vertical-align: top;
+        }
+        th {
+            background-color: #f1f5f9;
+        }
+        .status {
+            margin: 1rem 0;
+            min-height: 1.5rem;
+        }
+        .error { color: #dc2626; }
+        .success { color: #059669; }
+        pre {
+            white-space: pre-wrap;
+            word-break: break-word;
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Supabase Data Viewer</h1>
+
+    <div class="controls">
+        <label for="tableName">Table Name:</label>
+        <input type="text" id="tableName" placeholder="e.g., products, users" value="lead from yelp" />
+
+        <label for="limitRows">Max Rows to Load:</label>
+        <select id="limitRows">
+            <option value="5">5 rows</option>
+            <option value="10" selected>10 rows</option>
+            <option value="25">25 rows</option>
+            <option value="100">100 rows</option>
+            <option value="">All rows</option>
+        </select>
+
+        <button onclick="loadData()">Load Data</button>
+    </div>
+
+    <div class="status" id="status"></div>
+    <div id="tableContainer" style="overflow-x: auto;"></div>
+
+    <script>
+       const SUPABASE_URL = 'https://fprgtnngherdtzbiqbli.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZwcmd0bm5naGVyZHR6YmlxYmxpIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2Nzk1NTAzOSwiZXhwIjoyMDgzNTMxMDM5fQ.BKTcC7kQmB2Q0f43oizhVN2dWuHt8QgnSi2UL-ut7O4';
+        // ✅ CORRECT CLIENT INITIALIZATION
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        async function loadData() {
+            const tableName = document.getElementById('tableName').value.trim();
+            const limitValue = document.getElementById('limitRows').value;
+            const statusEl = document.getElementById('status');
+            const container = document.getElementById('tableContainer');
+
+            statusEl.className = 'status';
+            statusEl.textContent = '';
+            container.innerHTML = '';
+
+            if (!tableName) {
+                statusEl.className = 'status error';
+                statusEl.textContent = '⚠️ Please enter a table name.';
+                return;
+            }
+
+            statusEl.textContent = 'Loading...';
+
+            try {
+                let query = supabaseClient.from(tableName).select('*');
+
+                if (limitValue) {
+                    query = query.limit(parseInt(limitValue));
+                }
+
+                const { data, error } = await query;
+
+                if (error) {
+                    throw new Error(error.message || 'Unknown error');
+                }
+
+                if (!data || data.length === 0) {
+                    statusEl.className = 'status success';
+                    statusEl.textContent = `✅ Table "${tableName}" has no rows.`;
+                    return;
+                }
+
+                renderTable(data);
+                const msg = limitValue
+                    ? `✅ Loaded ${data.length} rows from "${tableName}" (limited to ${limitValue})`
+                    : `✅ Loaded all ${data.length} rows from "${tableName}"`;
+                statusEl.className = 'status success';
+                statusEl.textContent = msg;
+
+            } catch (err) {
+                console.error('Error:', err);
+                statusEl.className = 'status error';
+                statusEl.innerHTML = `❌ ${err.message}<br><small>Check table name, RLS policies, and network.</small>`;
+            }
+        }
+
+        function renderTable(data) {
+            const container = document.getElementById('tableContainer');
+            const columns = Object.keys(data[0]);
+
+            let html = `<table><thead><tr>`;
+            columns.forEach(col => {
+                html += `<th>${escapeHtml(col)}</th>`;
+            });
+            html += `</tr></thead><tbody>`;
+
+            data.forEach(row => {
+                html += '<tr>';
+                columns.forEach(col => {
+                    const val = row[col];
+                    let display;
+                    if (val === null) {
+                        display = '<em>NULL</em>';
+                    } else if (typeof val === 'object') {
+                        display = escapeHtml(JSON.stringify(val, null, 2));
+                    } else {
+                        display = escapeHtml(String(val));
+                    }
+                    html += `<td><pre>${display}</pre></td>`;
+                });
+                html += '</tr>';
+            });
+
+            html += '</tbody></table>';
+            container.innerHTML = html;
+        }
+
+        function escapeHtml(str) {
+            if (typeof str !== 'string') str = String(str);
+            return str
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+    </script>
+</body>
+</html>
